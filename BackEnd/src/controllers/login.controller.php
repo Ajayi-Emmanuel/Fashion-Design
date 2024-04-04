@@ -23,7 +23,7 @@
             if(password_verify($password, $row["password"])) {
                 
                 $_SESSION['username'] = $username;
-                echo "<script>alert('Enter Complete Details'); window.location.href = '../../../FrontEnd/Customer/customers.php';</script>";
+                echo "<script>alert('Login Successfull'); window.location.href = '../../../FrontEnd/Customer/customers.php';</script>";
                 
                 exit;
             }else {

@@ -1,0 +1,70 @@
+.modal{
+    display: none;
+    position:fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.modal-content{
+    
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,o.1);
+    animation: fadeIn 0.3s ease forwards;
+    width: 50%;
+}
+.measurement-header{
+    margin-bottom: 15px;
+    text-align: center;
+    color: #5E4B8B;
+    font-weight: 600;
+}
+.measurement-set{
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.measurement-detail{
+    margin-right: 20px;
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    color: #333;
+    transition: background-color 0.3s ease;
+    flex: 1 1 200px;
+}
+.measurement-detail:hover{
+    background-color: #e0e0e0;
+}
+.close{
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover,
+.close:focus{
+    color: black;
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

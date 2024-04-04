@@ -10,8 +10,10 @@ if(!isset($_SESSION['username'])) {
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <a href="http://"></a>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="table.css">
+    <link rel="stylesheet" href="measurement.css">
     <link rel="stylesheet" href="../logout.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -86,6 +88,16 @@ if(!isset($_SESSION['username'])) {
             <button id="individualButton">Individual</button>
             <button id="familyButton">Family</button>
         </div>
+
+        <div id="measurementModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick = "closeModal()">&times;</span>
+                <div id="measurements">
+                    <!-- Measurements details will be filled in by JavaScript -->
+                </div>
+            </div>
+        </div>
+
         <button id="addNewButton2" onclick="window.location.href = '../Customer/create-customer.php#individualx';">
             Add New Individual or Family
         </button>
@@ -100,16 +112,17 @@ if(!isset($_SESSION['username'])) {
                   $result = mysqli_query($conn, $sql);
                   if (mysqli_num_rows($result) > 0) {
                       // echo "<table border='1' class ='table'>";
-                      echo "<tr><th>S/N</th><th>Full Name</th><th>Gender</th><th>Phone Number</th><th>Address</th></tr>";
+                      echo "<tr><th>S/N</th><th>Full Name</th><th>Gender</th><th>Phone Number</th><th>Address</th><th>Show Measurement</th></tr>";
                       $serialNumber = 1;
                       while ($row = mysqli_fetch_assoc($result)) {
-                          echo "<tr>";
-                          echo "<td>" . $serialNumber++ . "</td>";
-                          echo "<td>" . $row['fullname'] . "</td>";
-                          echo "<td>" . $row['gender'] . "</td>";
-                          echo "<td>" . $row['phonenumber'] . "</td>";
-                          echo "<td>" . $row['address'] . "</td>";
-                          echo "</tr>";
+                        echo "<tr>";
+                        echo "<td>" . $serialNumber++ . "</td>";
+                        echo "<td>" . $row['fullname'] . "</td>";
+                        echo "<td>" . $row['gender'] . "</td>";
+                        echo "<td>" . $row['phonenumber'] . "</td>";
+                        echo "<td>" . $row['address'] . "</td>";
+                        echo "<td><i class='ri-more-line' style='cursor: pointer;' onclick='toggleMeasurements(" . $row['clientid'] . ")'</i></td>";
+                        echo "</tr>";
                       }
                   } else {
                     echo "<p class='error-message'>No clients has been registered</p>";
@@ -131,13 +144,14 @@ if(!isset($_SESSION['username'])) {
                     $result = mysqli_query($conn, $sql);
                     if (mysqli_num_rows($result) > 0) {
                         echo "<table border='1' class='table'>";
-                        echo "<tr><th>S/N</th><th>Family Name</th><th>Phone Number</th></tr>";
+                        echo "<tr><th>S/N</th><th>Family Name</th><th>Phone Number</th><th>Number of clients</th></tr>";
                         $serialNumber = 1;
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>";
                             echo "<td>" . $serialNumber++ . "</td>";
                             echo "<td>" . $row['familyname'] . "</td>";
                             echo "<td>" . $row['phonenumber'] . "</td>";
+                            echo "<td>" . $row['num_clients'] . "</td>";
                             echo "</tr>";
                         }
                     } else {
@@ -159,6 +173,72 @@ if(!isset($_SESSION['username'])) {
         sidebar.classList.toggle("close");
       });
 
+      function toggleMeasurements(clientid) {
+        var fullname = event.target.dataset.fullname;
+        var modal = document.getElementById("measurementModal");
+
+        if (modal.style.display === "none" || modal.style.display === "") {
+            modal.style.display = "block";
+        } else {
+            modal.style.display = "none";
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "../../BackEnd/src/controllers/fetch_measurement.php?clientid=" + clientid, true);
+        
+        xhr.onload = function() {
+            if (this.status == 200) {
+                var response = JSON.parse(this.responseText);
+
+                // Clear previous content
+                // measurementsDiv.innerHTML = '';
+
+                // Check if the response has an 'error' property
+                if (response.error) {
+                    // Display the error message with class for styling
+                    document.getElementById("measurements").innerHTML = "<p class ='error-message'>" + response.error + "</p>";
+                    
+                } else {
+                    // Proceed with assuming the response is an array of measurements
+                    
+                    var content = "<div class='measurements-container'><p class='measurement-header'>Measurements for Client with id: " + clientid + "</p>";
+
+                    response.forEach(function(measurement) {
+                        content += "<div class='measurement-set'>";
+                        for (var key in measurement) {
+                            if (measurement.hasOwnProperty(key)) {
+                                var niceKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                                content += "<div class='measurement-detail'>" + niceKey + ": " + measurement[key] + "</div>";
+                            }
+                        }
+                        content += "</div>"; // Close measurement-set div
+                    });
+
+                    content += "</div>"; // Close measurements-container div
+                    document.getElementById("measurements").innerHTML = content;
+                }
+            } else {
+                console.error("Server returned status:", this.status);
+                // Handle non-200 status by displaying an error message in the div
+                document.getElementById("measurements").innerHTML = "<p>Error loading measurement. Please try again</p>";
+            }
+        };
+
+
+
+
+        xhr.onerror = function() {
+            console.error("Error fetching measurements. Network issue.");
+            // Display an error message
+            document.getElementById("measurements").innerHTML = "<p>Error festching measurement due to network issues.</p>";
+        };
+        xhr.send();
+    }
+
+        function closeModal(){
+            var modal = document.getElementById("measurementModal");
+            modal.style.display = "none";
+        }
       document.addEventListener("DOMContentLoaded", function() {
           // Selecting DOM elements
           let individualButton = document.getElementById("individualButton");
